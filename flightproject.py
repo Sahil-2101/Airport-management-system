@@ -1,4 +1,9 @@
 import mysql.connector as ms
+
+'''
+@author Sahil Khatri
+'''
+
 mycon=ms.connect(host="localhost",user="root",passwd="1234",database="flightproject")
 if mycon.is_connected():
     print("successfully connected")
