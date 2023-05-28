@@ -7,7 +7,8 @@ from . import (
     AdminManager,
     EmployeeManager,
     PassengerManager,
-    FlightManager
+    FlightManager,
+    PassengerAccountManager
 )
 
 def main():
@@ -21,6 +22,7 @@ def main():
         employee_manager = EmployeeManager(db)
         passenger_manager = PassengerManager(db)
         flight_manager = FlightManager(db)
+        passenger_account_manager = PassengerAccountManager(db)
 
         while True:
             print("\nWelcome to Airport Management System")
@@ -28,11 +30,12 @@ def main():
             print("2. Employee")
             print("3. Passenger")
             print("4. Flight Management")
-            print("5. Exit")
+            print("5. Passenger Account")
+            print("6. Exit")
             
             choice = int(input("Enter your option: "))
             
-            if choice == 5:
+            if choice == 6:
                 print("Thank you for using the system!")
                 break
                 
@@ -162,6 +165,64 @@ def main():
                         departure = input("Enter departure location (optional): ")
                         arrival = input("Enter arrival location (optional): ")
                         flight_manager.search_flights(departure, arrival)
+
+            elif choice == 5:
+                while True:
+                    print("\nPassenger Account Menu:")
+                    print("1. Create Account")
+                    print("2. Login")
+                    print("3. Back to Main Menu")
+                    
+                    account_choice = int(input("Enter your option: "))
+                    if account_choice == 3:
+                        break
+
+                    if account_choice == 1:
+                        username = input("Enter username: ")
+                        password = input("Enter password: ")
+                        email = input("Enter email: ")
+                        name = input("Enter full name: ")
+                        phone = input("Enter phone number: ")
+                        passenger_account_manager.create_account(username, password, email, name, phone)
+                    
+                    elif account_choice == 2:
+                        username = input("Enter username: ")
+                        password = input("Enter password: ")
+                        if passenger_account_manager.login(username, password):
+                            while True:
+                                print("\nAccount Menu:")
+                                print("1. View Profile")
+                                print("2. Update Profile")
+                                print("3. Change Password")
+                                print("4. View Booking History")
+                                print("5. Back to Account Menu")
+                                
+                                profile_choice = int(input("Enter your option: "))
+                                if profile_choice == 5:
+                                    break
+                                    
+                                if profile_choice == 1:
+                                    passenger_account_manager.view_profile(username)
+                                elif profile_choice == 2:
+                                    print("\nFields available for update:")
+                                    print("1. Email")
+                                    print("2. Phone")
+                                    print("3. Name")
+                                    field_choice = int(input("Select field to update (1-3): "))
+                                    field_map = {1: 'email', 2: 'phone', 3: 'name'}
+                                    if field_choice in field_map:
+                                        new_value = input(f"Enter new {field_map[field_choice]}: ")
+                                        passenger_account_manager.update_profile(username, 
+                                                                               field_map[field_choice], 
+                                                                               new_value)
+                                elif profile_choice == 3:
+                                    current_password = input("Enter current password: ")
+                                    new_password = input("Enter new password: ")
+                                    passenger_account_manager.change_password(username, 
+                                                                            current_password, 
+                                                                            new_password)
+                                elif profile_choice == 4:
+                                    passenger_account_manager.view_booking_history(username)
 
     except Exception as e:
         print(f"An error occurred: {e}")
