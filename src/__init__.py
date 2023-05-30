@@ -7,7 +7,9 @@ from .managers import (
     AdminManager,
     EmployeeManager,
     PassengerManager,
-    FlightManager
+    FlightManager,
+    PassengerAccountManager,
+    BookingManager
 )
 
 __all__ = [
