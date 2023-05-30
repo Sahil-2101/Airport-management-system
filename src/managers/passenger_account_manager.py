@@ -2,7 +2,7 @@
 Passenger account management module for the Airport Management System.
 """
 
-from ..database.connection import DatabaseConnection
+from src.database.connection import DatabaseConnection
 from datetime import datetime
 import hashlib
 

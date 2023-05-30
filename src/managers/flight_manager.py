@@ -2,7 +2,7 @@
 Flight management module for the Airport Management System.
 """
 
-from ..database.connection import DatabaseConnection
+from src.database.connection import DatabaseConnection
 
 class FlightManager:
     """Handles all flight-related operations."""

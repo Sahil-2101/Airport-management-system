@@ -2,7 +2,7 @@
 Employee management module for the Airport Management System.
 """
 
-from ..database.connection import DatabaseConnection
+from src.database.connection import DatabaseConnection
 
 class EmployeeManager:
     """Handles all employee operations."""
