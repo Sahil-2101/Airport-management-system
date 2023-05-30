@@ -8,7 +8,8 @@ from . import (
     EmployeeManager,
     PassengerManager,
     FlightManager,
-    PassengerAccountManager
+    PassengerAccountManager,
+    BookingManager
 )
 
 def main():
@@ -23,6 +24,7 @@ def main():
         passenger_manager = PassengerManager(db)
         flight_manager = FlightManager(db)
         passenger_account_manager = PassengerAccountManager(db)
+        booking_manager = BookingManager(db)
 
         while True:
             print("\nWelcome to Airport Management System")
@@ -31,13 +33,11 @@ def main():
             print("3. Passenger")
             print("4. Flight Management")
             print("5. Passenger Account")
-            print("6. Exit")
+            print("6. Book Flight")
+            print("7. Exit")
             
             choice = int(input("Enter your option: "))
             
-            if choice == 6:
-                print("Thank you for using the system!")
-                break
                 
             if choice == 1:
                 password = int(input("Enter admin password: "))
@@ -223,6 +223,67 @@ def main():
                                                                             new_password)
                                 elif profile_choice == 4:
                                     passenger_account_manager.view_booking_history(username)
+
+            elif choice == 6:
+                while True:
+                    print("\nBooking Menu:")
+                    print("1. Book a Flight")
+                    print("2. View Booking")
+                    print("3. Cancel Booking")
+                    print("4. Back to Main Menu")
+                    
+                    booking_choice = int(input("Enter your option: "))
+                    if booking_choice == 4:
+                        break
+
+                    if booking_choice == 1:
+                        # First, search for available flights
+                        departure = input("Enter departure location: ")
+                        arrival = input("Enter arrival location: ")
+                        flight_manager.search_flights(departure, arrival)
+                        
+                        # Get flight details
+                        flight_series = input("Enter flight series: ")
+                        flight_number = int(input("Enter flight number: "))
+                        
+                        # Show available seats
+                        available_seats = booking_manager.get_available_seats(flight_series, flight_number)
+                        if available_seats:
+                            print("\nAvailable seats:", ", ".join(available_seats))
+                            seat_number = input("Enter seat number: ")
+                            
+                            # Get payment method
+                            print("\nPayment Methods:")
+                            print("1. Credit Card")
+                            print("2. Debit Card")
+                            print("3. Net Banking")
+                            payment_choice = int(input("Select payment method (1-3): "))
+                            payment_methods = {1: "CREDIT_CARD", 2: "DEBIT_CARD", 3: "NET_BANKING"}
+                            payment_method = payment_methods.get(payment_choice)
+                            
+                            if payment_method:
+                                # Get passenger account
+                                username = input("Enter your username: ")
+                                password = input("Enter your password: ")
+                                
+                                if passenger_account_manager.login(username, password):
+                                    booking_manager.book_flight(username, flight_series, 
+                                                              flight_number, seat_number, 
+                                                              payment_method)
+                        else:
+                            print("No seats available for this flight")
+
+                    elif booking_choice == 2:
+                        booking_id = input("Enter booking ID: ")
+                        booking_manager.view_booking(booking_id)
+
+                    elif booking_choice == 3:
+                        booking_id = input("Enter booking ID: ")
+                        booking_manager.cancel_booking(booking_id)
+            
+            elif choice == 7:
+                print("Thank you for using the system!")
+                break
 
     except Exception as e:
         print(f"An error occurred: {e}")
