@@ -1,3 +1,3 @@
 """
-Airport Management System package.
+Root package for the Airport Management System.
 """ 

@@ -36,6 +36,9 @@ def main():
             
             choice = int(input("Enter your option: "))
             
+            if choice == 7:
+                print("Thank you for using the system!")
+                break
                 
             if choice == 1:
                 password = int(input("Enter admin password: "))
@@ -278,10 +281,6 @@ def main():
                     elif booking_choice == 3:
                         booking_id = input("Enter booking ID: ")
                         booking_manager.cancel_booking(booking_id)
-            
-            elif choice == 7:
-                print("Thank you for using the system!")
-                break
 
     except Exception as e:
         print(f"An error occurred: {e}")
