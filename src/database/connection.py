@@ -2,7 +2,7 @@
 Database connection handler for the Airport Management System.
 """
 
-import mysql.connector as ms
+import mysql.connector
 from typing import List, Optional
 from .config import DB_CONFIG
 
@@ -12,11 +12,11 @@ class DatabaseConnection:
     def __init__(self):
         """Initialize database connection and cursor."""
         try:
-            self.connection = ms.connect(**DB_CONFIG)
+            self.connection = mysql.connector.connect(**DB_CONFIG)
             if self.connection.is_connected():
                 print("Successfully connected to database")
             self.cursor = self.connection.cursor()
-        except ms.error as e:
+        except mysql.connector.Error as e:
             print(f"Error connecting to database: {e}")
             raise
 
@@ -28,6 +28,6 @@ class DatabaseConnection:
                 return self.cursor.fetchall()
             self.connection.commit()
             return None
-        except ms.error as e:
+        except mysql.connector.Error as e:
             print(f"Error executing query: {e}")
             return None 
