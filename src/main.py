@@ -2,13 +2,13 @@
 Main application file for the Airport Management System.
 """
 
-from database.connection import DatabaseConnection
-from managers.admin_manager import AdminManager
-from managers.employee_manager import EmployeeManager
-from managers.passenger_manager import PassengerManager
-from managers.flight_manager import FlightManager
-from managers.passenger_account_manager import PassengerAccountManager
-from managers.booking_manager import BookingManager
+from src.database.connection import DatabaseConnection
+from src.managers.admin_manager import AdminManager
+from src.managers.employee_manager import EmployeeManager
+from src.managers.passenger_manager import PassengerManager
+from src.managers.flight_manager import FlightManager
+from src.managers.passenger_account_manager import PassengerAccountManager
+from src.managers.booking_manager import BookingManager
 
 def main():
     """Main function to run the airport management system."""

@@ -2,7 +2,7 @@
 Passenger management module for the Airport Management System.
 """
 
-from database.connection import DatabaseConnection
+from src.database.connection import DatabaseConnection
 
 class PassengerManager:
     """Handles all passenger operations."""

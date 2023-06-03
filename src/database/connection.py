@@ -16,7 +16,7 @@ class DatabaseConnection:
             if self.connection.is_connected():
                 print("Successfully connected to database")
             self.cursor = self.connection.cursor()
-        except ms.Error as e:
+        except ms.error as e:
             print(f"Error connecting to database: {e}")
             raise
 
@@ -28,6 +28,6 @@ class DatabaseConnection:
                 return self.cursor.fetchall()
             self.connection.commit()
             return None
-        except ms.Error as e:
+        except ms.error as e:
             print(f"Error executing query: {e}")
             return None 
