@@ -118,4 +118,28 @@ class FlightManager:
             for row in result:
                 print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}")
         else:
+            print("No flights found matching the criteria")
+
+    def search_flights_advanced(self, date: str = None, departure: str = None, arrival: str = None) -> None:
+        """Search for flights by date, departure, and/or arrival locations."""
+        query = "SELECT * FROM flight WHERE 1=1"
+        params = []
+        if date:
+            query += " AND DATE(departuretime) = %s"
+            params.append(date)
+        if departure:
+            query += " AND departure = %s"
+            params.append(departure)
+        if arrival:
+            query += " AND arrival = %s"
+            params.append(arrival)
+
+        query += " ORDER BY departuretime"
+        result = self.db.execute_query(query, tuple(params))
+        if result:
+            print("\nSearch Results:")
+            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats")
+            for row in result:
+                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}")
+        else:
             print("No flights found matching the criteria") 

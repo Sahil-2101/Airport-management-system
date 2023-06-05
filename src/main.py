@@ -135,11 +135,12 @@ def main():
                     print("2. Update Flight Status")
                     print("3. View Flight Schedule")
                     print("4. Search Flights")
-                    print("5. Check Flight Status")
-                    print("6. Back to Main Menu")
+                    print("5. Advanced Flight Search")
+                    print("6. Check Flight Status")
+                    print("7. Back to Main Menu")
                     
                     flight_choice = int(input("Enter your option: "))
-                    if flight_choice == 6:
+                    if flight_choice == 7:
                         break
                         
                     if flight_choice == 1:
@@ -176,6 +177,11 @@ def main():
                         arrival = input("Enter arrival location (optional): ")
                         flight_manager.search_flights(departure, arrival)
                     elif flight_choice == 5:
+                        date = input("Enter date (YYYY-MM-DD, optional): ")
+                        departure = input("Enter departure location (optional): ")
+                        arrival = input("Enter arrival location (optional): ")
+                        flight_manager.search_flights_advanced(date if date else None, departure if departure else None, arrival if arrival else None)
+                    elif flight_choice == 6:
                         flight_series = input("Enter flight series: ")
                         flight_number = int(input("Enter flight number: "))
                         status = flight_manager.get_flight_status(flight_series, flight_number)
