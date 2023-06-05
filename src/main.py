@@ -6,7 +6,7 @@ from src.database.connection import DatabaseConnection
 from src.managers.admin_manager import AdminManager
 from src.managers.employee_manager import EmployeeManager
 from src.managers.passenger_manager import PassengerManager
-from src.managers.flight_manager import FlightManager
+from src.managers.flight_manager import FlightManager, FlightStatus
 from src.managers.passenger_account_manager import PassengerAccountManager
 from src.managers.booking_manager import BookingManager
 
@@ -135,10 +135,11 @@ def main():
                     print("2. Update Flight Status")
                     print("3. View Flight Schedule")
                     print("4. Search Flights")
-                    print("5. Back to Main Menu")
+                    print("5. Check Flight Status")
+                    print("6. Back to Main Menu")
                     
                     flight_choice = int(input("Enter your option: "))
-                    if flight_choice == 5:
+                    if flight_choice == 6:
                         break
                         
                     if flight_choice == 1:
@@ -150,15 +151,23 @@ def main():
                         arrival_time = input("Enter arrival time (YYYY-MM-DD HH:MM): ")
                         total_seats = int(input("Enter total seats: "))
                         available_seats = int(input("Enter available seats: "))
-                        status = input("Enter flight status: ")
                         flight_manager.add_flight(flight_series, flight_number, departure, 
                                                arrival, departure_time, arrival_time,
-                                               total_seats, available_seats, status)
+                                               total_seats, available_seats)
                     elif flight_choice == 2:
                         flight_series = input("Enter flight series: ")
                         flight_number = int(input("Enter flight number: "))
+                        print("\nAvailable Statuses:")
+                        for status in FlightStatus:
+                            print(f"- {status.value}")
                         new_status = input("Enter new status: ")
-                        flight_manager.update_flight_status(flight_series, flight_number, new_status)
+                        if new_status.upper() == FlightStatus.DELAYED.value:
+                            delay_minutes = int(input("Enter delay in minutes: "))
+                            flight_manager.update_flight_status(flight_series, flight_number, 
+                                                             new_status, delay_minutes)
+                        else:
+                            flight_manager.update_flight_status(flight_series, flight_number, 
+                                                             new_status)
                     elif flight_choice == 3:
                         date = input("Enter date to view schedule (YYYY-MM-DD) or press Enter for all: ")
                         flight_manager.view_flight_schedule(date if date else None)
@@ -166,6 +175,14 @@ def main():
                         departure = input("Enter departure location (optional): ")
                         arrival = input("Enter arrival location (optional): ")
                         flight_manager.search_flights(departure, arrival)
+                    elif flight_choice == 5:
+                        flight_series = input("Enter flight series: ")
+                        flight_number = int(input("Enter flight number: "))
+                        status = flight_manager.get_flight_status(flight_series, flight_number)
+                        if status:
+                            print(f"\nFlight Status: {status}")
+                        else:
+                            print("Flight not found")
 
             elif choice == 5:
                 while True:
@@ -246,6 +263,15 @@ def main():
                         # Get flight details
                         flight_series = input("Enter flight series: ")
                         flight_number = int(input("Enter flight number: "))
+                        
+                        # Check flight status
+                        status = flight_manager.get_flight_status(flight_series, flight_number)
+                        if status == FlightStatus.CANCELLED.value:
+                            print("This flight has been cancelled. Cannot book.")
+                            continue
+                        elif status == FlightStatus.DELAYED.value:
+                            print("This flight is delayed. Please check the new schedule.")
+                            continue
                         
                         # Show available seats
                         available_seats = booking_manager.get_available_seats(flight_series, flight_number)
