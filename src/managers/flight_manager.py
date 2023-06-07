@@ -142,4 +142,10 @@ class FlightManager:
             for row in result:
                 print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}")
         else:
-            print("No flights found matching the criteria") 
+            print("No flights found matching the criteria")
+
+    def reschedule_flight(self, flight_series: str, flight_number: int, new_departure_time: str, new_arrival_time: str) -> None:
+        """Reschedule a flight by updating its departure and arrival times."""
+        query = "UPDATE flight SET departuretime = %s, arrivaltime = %s WHERE flightseries = %s AND flightnumber = %s"
+        self.db.execute_query(query, (new_departure_time, new_arrival_time, flight_series, flight_number))
+        print(f"Flight {flight_series}{flight_number} rescheduled to depart at {new_departure_time} and arrive at {new_arrival_time}.") 

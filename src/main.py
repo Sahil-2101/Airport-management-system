@@ -137,10 +137,11 @@ def main():
                     print("4. Search Flights")
                     print("5. Advanced Flight Search")
                     print("6. Check Flight Status")
-                    print("7. Back to Main Menu")
+                    print("7. Reschedule Flight")
+                    print("8. Back to Main Menu")
                     
                     flight_choice = int(input("Enter your option: "))
-                    if flight_choice == 7:
+                    if flight_choice == 8:
                         break
                         
                     if flight_choice == 1:
@@ -189,6 +190,12 @@ def main():
                             print(f"\nFlight Status: {status}")
                         else:
                             print("Flight not found")
+                    elif flight_choice == 7:
+                        flight_series = input("Enter flight series: ")
+                        flight_number = int(input("Enter flight number: "))
+                        new_departure_time = input("Enter new departure time (YYYY-MM-DD HH:MM): ")
+                        new_arrival_time = input("Enter new arrival time (YYYY-MM-DD HH:MM): ")
+                        flight_manager.reschedule_flight(flight_series, flight_number, new_departure_time, new_arrival_time)
 
             elif choice == 5:
                 while True:
