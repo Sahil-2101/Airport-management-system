@@ -53,12 +53,13 @@ def main():
                         print("2. Insert Employee")
                         print("3. Update Employee")
                         print("4. Delete Employee")
-                        print("5. Back to Main Menu")
+                        print("5. List All Employees (Paginated)")
+                        print("6. Back to Main Menu")
                         
                         admin_choice = int(input("Enter your option: "))
-                        if admin_choice == 5:
+                        if admin_choice == 6:
                             break
-                            
+                        
                         if admin_choice == 1:
                             emp_id = int(input("Enter employee ID: "))
                             admin_manager.display_employee(emp_id)
@@ -76,6 +77,17 @@ def main():
                         elif admin_choice == 4:
                             emp_id = int(input("Enter employee ID: "))
                             admin_manager.delete_employee(emp_id)
+                        elif admin_choice == 5:
+                            page = 1
+                            while True:
+                                admin_manager.list_employees(page=page)
+                                nav = input("Enter N for next page, P for previous page, or any other key to exit: ").strip().upper()
+                                if nav == 'N':
+                                    page += 1
+                                elif nav == 'P' and page > 1:
+                                    page -= 1
+                                else:
+                                    break
                 else:
                     print("Incorrect password")
                     
@@ -176,12 +188,30 @@ def main():
                     elif flight_choice == 4:
                         departure = input("Enter departure location (optional): ")
                         arrival = input("Enter arrival location (optional): ")
-                        flight_manager.search_flights(departure, arrival)
+                        page = 1
+                        while True:
+                            flight_manager.search_flights(departure, arrival, page=page)
+                            nav = input("Enter N for next page, P for previous page, or any other key to exit: ").strip().upper()
+                            if nav == 'N':
+                                page += 1
+                            elif nav == 'P' and page > 1:
+                                page -= 1
+                            else:
+                                break
                     elif flight_choice == 5:
                         date = input("Enter date (YYYY-MM-DD, optional): ")
                         departure = input("Enter departure location (optional): ")
                         arrival = input("Enter arrival location (optional): ")
-                        flight_manager.search_flights_advanced(date if date else None, departure if departure else None, arrival if arrival else None)
+                        page = 1
+                        while True:
+                            flight_manager.search_flights_advanced(date if date else None, departure if departure else None, arrival if arrival else None, page=page)
+                            nav = input("Enter N for next page, P for previous page, or any other key to exit: ").strip().upper()
+                            if nav == 'N':
+                                page += 1
+                            elif nav == 'P' and page > 1:
+                                page -= 1
+                            else:
+                                break
                     elif flight_choice == 6:
                         flight_series = input("Enter flight series: ")
                         flight_number = int(input("Enter flight number: "))

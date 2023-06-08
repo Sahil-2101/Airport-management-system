@@ -39,3 +39,16 @@ class AdminManager:
                 query = "DELETE FROM Employee WHERE employeeid = %s"
                 self.db.execute_query(query, (emp_id,))
                 print("Record deleted successfully")
+
+    def list_employees(self, page: int = 1, page_size: int = 5) -> None:
+        """List all employees with pagination."""
+        offset = (page - 1) * page_size
+        query = "SELECT * FROM Employee ORDER BY employeeid LIMIT %s OFFSET %s"
+        result = self.db.execute_query(query, (page_size, offset))
+        if result:
+            print(f"\nEmployee List (Page {page}):")
+            print("ID\tName\tSales\tJob ID")
+            for row in result:
+                print(f"{row[0]}\t{row[1]}\t{row[2]}\t{row[3]}")
+        else:
+            print("No employees found on this page.")
