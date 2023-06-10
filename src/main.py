@@ -10,8 +10,12 @@ from src.managers.flight_manager import FlightManager, FlightStatus
 from src.managers.passenger_account_manager import PassengerAccountManager
 from src.managers.booking_manager import BookingManager
 
+# Global variable to store the current user's role
+current_user_role = None
+
 def main():
     """Main function to run the airport management system."""
+    global current_user_role
     try:
         # Initialize database connection
         db = DatabaseConnection()
@@ -32,11 +36,12 @@ def main():
             print("4. Flight Management")
             print("5. Passenger Account")
             print("6. Book Flight")
-            print("7. Exit")
+            print("7. Logout")
+            print("8. Exit")
             
             choice = int(input("Enter your option: "))
             
-            if choice == 7:
+            if choice == 8:
                 print("Thank you for using the system!")
                 break
                 
@@ -46,6 +51,7 @@ def main():
                 query = "SELECT * FROM admin WHERE password = %s"
                 result = db.execute_query(query, (password,))
                 if result:
+                    current_user_role = "Admin"
                     print(f"Welcome {result[0][0]}")
                     while True:
                         print("\nAdmin Menu:")
@@ -97,6 +103,7 @@ def main():
                 query = "SELECT * FROM employeepass WHERE password = %s"
                 result = db.execute_query(query, (password,))
                 if result:
+                    current_user_role = "Employee"
                     print(f"Welcome {result[0][0]}")
                     while True:
                         print("\nEmployee Menu:")
@@ -121,6 +128,7 @@ def main():
                     print("Incorrect password")
                     
             elif choice == 3:
+                current_user_role = "User"
                 while True:
                     print("\nPassenger Menu:")
                     print("1. Check Details")
@@ -141,91 +149,94 @@ def main():
                         passenger_manager.cancel_flight(passport_ser, passport_no)
 
             elif choice == 4:
-                while True:
-                    print("\nFlight Management Menu:")
-                    print("1. Add New Flight")
-                    print("2. Update Flight Status")
-                    print("3. View Flight Schedule")
-                    print("4. Search Flights")
-                    print("5. Advanced Flight Search")
-                    print("6. Check Flight Status")
-                    print("7. Reschedule Flight")
-                    print("8. Back to Main Menu")
-                    
-                    flight_choice = int(input("Enter your option: "))
-                    if flight_choice == 8:
-                        break
+                if current_user_role in ["Admin", "Employee"]:
+                    while True:
+                        print("\nFlight Management Menu:")
+                        print("1. Add New Flight")
+                        print("2. Update Flight Status")
+                        print("3. View Flight Schedule")
+                        print("4. Search Flights")
+                        print("5. Advanced Flight Search")
+                        print("6. Check Flight Status")
+                        print("7. Reschedule Flight")
+                        print("8. Back to Main Menu")
                         
-                    if flight_choice == 1:
-                        flight_series = input("Enter flight series: ")
-                        flight_number = int(input("Enter flight number: "))
-                        departure = input("Enter departure location: ")
-                        arrival = input("Enter arrival location: ")
-                        departure_time = input("Enter departure time (YYYY-MM-DD HH:MM): ")
-                        arrival_time = input("Enter arrival time (YYYY-MM-DD HH:MM): ")
-                        total_seats = int(input("Enter total seats: "))
-                        available_seats = int(input("Enter available seats: "))
-                        flight_manager.add_flight(flight_series, flight_number, departure, 
-                                               arrival, departure_time, arrival_time,
-                                               total_seats, available_seats)
-                    elif flight_choice == 2:
-                        flight_series = input("Enter flight series: ")
-                        flight_number = int(input("Enter flight number: "))
-                        print("\nAvailable Statuses:")
-                        for status in FlightStatus:
-                            print(f"- {status.value}")
-                        new_status = input("Enter new status: ")
-                        if new_status.upper() == FlightStatus.DELAYED.value:
-                            delay_minutes = int(input("Enter delay in minutes: "))
-                            flight_manager.update_flight_status(flight_series, flight_number, 
-                                                             new_status, delay_minutes)
-                        else:
-                            flight_manager.update_flight_status(flight_series, flight_number, 
-                                                             new_status)
-                    elif flight_choice == 3:
-                        date = input("Enter date to view schedule (YYYY-MM-DD) or press Enter for all: ")
-                        flight_manager.view_flight_schedule(date if date else None)
-                    elif flight_choice == 4:
-                        departure = input("Enter departure location (optional): ")
-                        arrival = input("Enter arrival location (optional): ")
-                        page = 1
-                        while True:
-                            flight_manager.search_flights(departure, arrival, page=page)
-                            nav = input("Enter N for next page, P for previous page, or any other key to exit: ").strip().upper()
-                            if nav == 'N':
-                                page += 1
-                            elif nav == 'P' and page > 1:
-                                page -= 1
+                        flight_choice = int(input("Enter your option: "))
+                        if flight_choice == 8:
+                            break
+                            
+                        if flight_choice == 1:
+                            flight_series = input("Enter flight series: ")
+                            flight_number = int(input("Enter flight number: "))
+                            departure = input("Enter departure location: ")
+                            arrival = input("Enter arrival location: ")
+                            departure_time = input("Enter departure time (YYYY-MM-DD HH:MM): ")
+                            arrival_time = input("Enter arrival time (YYYY-MM-DD HH:MM): ")
+                            total_seats = int(input("Enter total seats: "))
+                            available_seats = int(input("Enter available seats: "))
+                            flight_manager.add_flight(flight_series, flight_number, departure, 
+                                                   arrival, departure_time, arrival_time,
+                                                   total_seats, available_seats)
+                        elif flight_choice == 2:
+                            flight_series = input("Enter flight series: ")
+                            flight_number = int(input("Enter flight number: "))
+                            print("\nAvailable Statuses:")
+                            for status in FlightStatus:
+                                print(f"- {status.value}")
+                            new_status = input("Enter new status: ")
+                            if new_status.upper() == FlightStatus.DELAYED.value:
+                                delay_minutes = int(input("Enter delay in minutes: "))
+                                flight_manager.update_flight_status(flight_series, flight_number, 
+                                                                 new_status, delay_minutes)
                             else:
-                                break
-                    elif flight_choice == 5:
-                        date = input("Enter date (YYYY-MM-DD, optional): ")
-                        departure = input("Enter departure location (optional): ")
-                        arrival = input("Enter arrival location (optional): ")
-                        page = 1
-                        while True:
-                            flight_manager.search_flights_advanced(date if date else None, departure if departure else None, arrival if arrival else None, page=page)
-                            nav = input("Enter N for next page, P for previous page, or any other key to exit: ").strip().upper()
-                            if nav == 'N':
-                                page += 1
-                            elif nav == 'P' and page > 1:
-                                page -= 1
+                                flight_manager.update_flight_status(flight_series, flight_number, 
+                                                                 new_status)
+                        elif flight_choice == 3:
+                            date = input("Enter date to view schedule (YYYY-MM-DD) or press Enter for all: ")
+                            flight_manager.view_flight_schedule(date if date else None)
+                        elif flight_choice == 4:
+                            departure = input("Enter departure location (optional): ")
+                            arrival = input("Enter arrival location (optional): ")
+                            page = 1
+                            while True:
+                                flight_manager.search_flights(departure, arrival, page=page)
+                                nav = input("Enter N for next page, P for previous page, or any other key to exit: ").strip().upper()
+                                if nav == 'N':
+                                    page += 1
+                                elif nav == 'P' and page > 1:
+                                    page -= 1
+                                else:
+                                    break
+                        elif flight_choice == 5:
+                            date = input("Enter date (YYYY-MM-DD, optional): ")
+                            departure = input("Enter departure location (optional): ")
+                            arrival = input("Enter arrival location (optional): ")
+                            page = 1
+                            while True:
+                                flight_manager.search_flights_advanced(date if date else None, departure if departure else None, arrival if arrival else None, page=page)
+                                nav = input("Enter N for next page, P for previous page, or any other key to exit: ").strip().upper()
+                                if nav == 'N':
+                                    page += 1
+                                elif nav == 'P' and page > 1:
+                                    page -= 1
+                                else:
+                                    break
+                        elif flight_choice == 6:
+                            flight_series = input("Enter flight series: ")
+                            flight_number = int(input("Enter flight number: "))
+                            status = flight_manager.get_flight_status(flight_series, flight_number)
+                            if status:
+                                print(f"\nFlight Status: {status}")
                             else:
-                                break
-                    elif flight_choice == 6:
-                        flight_series = input("Enter flight series: ")
-                        flight_number = int(input("Enter flight number: "))
-                        status = flight_manager.get_flight_status(flight_series, flight_number)
-                        if status:
-                            print(f"\nFlight Status: {status}")
-                        else:
-                            print("Flight not found")
-                    elif flight_choice == 7:
-                        flight_series = input("Enter flight series: ")
-                        flight_number = int(input("Enter flight number: "))
-                        new_departure_time = input("Enter new departure time (YYYY-MM-DD HH:MM): ")
-                        new_arrival_time = input("Enter new arrival time (YYYY-MM-DD HH:MM): ")
-                        flight_manager.reschedule_flight(flight_series, flight_number, new_departure_time, new_arrival_time)
+                                print("Flight not found")
+                        elif flight_choice == 7:
+                            flight_series = input("Enter flight series: ")
+                            flight_number = int(input("Enter flight number: "))
+                            new_departure_time = input("Enter new departure time (YYYY-MM-DD HH:MM): ")
+                            new_arrival_time = input("Enter new arrival time (YYYY-MM-DD HH:MM): ")
+                            flight_manager.reschedule_flight(flight_series, flight_number, new_departure_time, new_arrival_time)
+                else:
+                    print("Access denied. Only Admin and Employee can manage flights.")
 
             elif choice == 5:
                 while True:
@@ -250,6 +261,7 @@ def main():
                         username = input("Enter username: ")
                         password = input("Enter password: ")
                         if passenger_account_manager.login(username, password):
+                            current_user_role = "User"
                             while True:
                                 print("\nAccount Menu:")
                                 print("1. View Profile")
@@ -350,6 +362,10 @@ def main():
                     elif booking_choice == 3:
                         booking_id = input("Enter booking ID: ")
                         booking_manager.cancel_booking(booking_id)
+
+            elif choice == 7:
+                current_user_role = None
+                print("Logged out successfully.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
