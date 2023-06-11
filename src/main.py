@@ -109,10 +109,12 @@ def main():
                         print("\nEmployee Menu:")
                         print("1. Display Flight")
                         print("2. Book Flight")
-                        print("3. Back to Main Menu")
+                        print("3. View Assigned Flights")
+                        print("4. Update Passenger Details")
+                        print("5. Back to Main Menu")
                         
                         emp_choice = int(input("Enter your option: "))
-                        if emp_choice == 3:
+                        if emp_choice == 5:
                             break
                             
                         if emp_choice == 1:
@@ -124,6 +126,15 @@ def main():
                             flight_number = int(input("Enter flight number: "))
                             num_passengers = int(input("Enter number of passengers: "))
                             employee_manager.book_flight(flight_series, flight_number, num_passengers)
+                        elif emp_choice == 3:
+                            emp_id = int(input("Enter your employee ID: "))
+                            employee_manager.view_assigned_flights(emp_id)
+                        elif emp_choice == 4:
+                            passport_ser = input("Enter passport serial: ")
+                            passport_no = int(input("Enter passport number: "))
+                            field = input("Enter field to update: ")
+                            new_value = input("Enter new value: ")
+                            employee_manager.update_passenger_details(passport_ser, passport_no, field, new_value)
                 else:
                     print("Incorrect password")
                     

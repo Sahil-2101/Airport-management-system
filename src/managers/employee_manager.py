@@ -49,4 +49,21 @@ class EmployeeManager:
                   (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         params = (flight_series, flight_number, name, passport_ser, passport_no,
                  dob, passport_doi, passport_doe, visa_no)
-        self.db.execute_query(query, params) 
+        self.db.execute_query(query, params)
+
+    def view_assigned_flights(self, emp_id: int) -> None:
+        """View flights assigned to a specific employee."""
+        query = "SELECT * FROM flight WHERE assigned_employee_id = %s"
+        result = self.db.execute_query(query, (emp_id,))
+        if result:
+            print("\nAssigned Flights:")
+            for row in result:
+                print(f"Flight: {row[0]}{row[1]}, From: {row[2]}, To: {row[3]}, Departure: {row[4]}, Arrival: {row[5]}, Status: {row[8]}")
+        else:
+            print("No flights assigned to this employee.")
+
+    def update_passenger_details(self, passport_ser: str, passport_no: int, field: str, new_value: str) -> None:
+        """Update specific passenger details."""
+        query = f"UPDATE passenger SET {field} = %s WHERE passport_serial = %s AND passport_number = %s"
+        self.db.execute_query(query, (new_value, passport_ser, passport_no))
+        print(f"Passenger details updated successfully.") 
