@@ -5,12 +5,19 @@ Passenger account management module for the Airport Management System.
 from src.database.connection import DatabaseConnection
 from datetime import datetime
 import hashlib
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 class PassengerAccountManager:
     """Handles all passenger account operations."""
 
     def __init__(self, db: DatabaseConnection):
         self.db = db
+        self.smtp_server = "smtp.gmail.com"
+        self.smtp_port = 587
+        self.sender_email = "your_email@gmail.com"  # Replace with your email
+        self.sender_password = "your_password"  # Replace with your password
 
     def _hash_password(self, password: str) -> str:
         """Hash the password for secure storage."""
@@ -131,4 +138,35 @@ class PassengerAccountManager:
             for row in result:
                 print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[6]}")
         else:
-            print("No booking history found") 
+            print("No booking history found")
+
+    def send_confirmation_email(self, recipient_email: str, booking_details: str) -> None:
+        """Send a confirmation email for booking."""
+        msg = MIMEMultipart()
+        msg['From'] = self.sender_email
+        msg['To'] = recipient_email
+        msg['Subject'] = "Booking Confirmation"
+        body = f"Thank you for your booking. Here are your booking details:\n{booking_details}"
+        msg.attach(MIMEText(body, 'plain'))
+        
+        try:
+            server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+            server.starttls()
+            server.login(self.sender_email, self.sender_password)
+            server.send_message(msg)
+            server.quit()
+            print("Confirmation email sent successfully.")
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+
+    def book_flight(self, username: str, flight_series: str, flight_number: int, seat_number: str, payment_method: str) -> None:
+        """Book a flight and send confirmation email."""
+        # Get passenger email
+        query = "SELECT email FROM passenger_accounts WHERE username = %s"
+        result = self.db.execute_query(query, (username,))
+        if result:
+            recipient_email = result[0][0]
+            booking_details = f"Flight: {flight_series}{flight_number}, Seat: {seat_number}, Payment Method: {payment_method}"
+            self.send_confirmation_email(recipient_email, booking_details)
+        else:
+            print("User email not found.") 
