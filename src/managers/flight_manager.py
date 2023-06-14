@@ -33,41 +33,48 @@ class FlightManager:
         self.db.execute_query(query, params)
         print("Flight added successfully")
 
-    def update_flight_status(self, flight_series: str, flight_number: int, 
-                           new_status: str, delay_minutes: int = None) -> None:
-        """Update the status of a flight with optional delay information."""
+    def update_flight_status(self, flight_number, new_status, delay_minutes=None):
+        """Update the status of a flight"""
         try:
-            # Validate the status
-            status = FlightStatus(new_status.upper())
-            
-            # Get current flight details
-            query = "SELECT departuretime, arrivaltime FROM flight WHERE flightseries = %s AND flightnumber = %s"
-            result = self.db.execute_query(query, (flight_series, flight_number))
-            
-            if not result:
-                print("Flight not found")
-                return
+            # Validate the new status
+            if new_status not in [status.value for status in FlightStatus]:
+                raise ValueError(f"Invalid status. Must be one of: {[status.value for status in FlightStatus]}")
+
+            # If status is DELAYED, update departure and arrival times
+            if new_status == FlightStatus.DELAYED.value and delay_minutes is not None:
+                # Get current flight times
+                self.cursor.execute("""
+                    SELECT departuretime, arrivaltime 
+                    FROM flight 
+                    WHERE flightnumber = %s
+                """, (flight_number,))
+                result = self.cursor.fetchone()
+                if not result:
+                    raise ValueError(f"Flight {flight_number} not found")
                 
-            current_departure = result[0][0]
-            current_arrival = result[0][1]
-            
-            # If delayed, update the times
-            if status == FlightStatus.DELAYED and delay_minutes:
-                new_departure = current_departure + timedelta(minutes=delay_minutes)
-                new_arrival = current_arrival + timedelta(minutes=delay_minutes)
-                query = """UPDATE flight 
-                          SET status = %s, departuretime = %s, arrivaltime = %s 
-                          WHERE flightseries = %s AND flightnumber = %s"""
-                self.db.execute_query(query, (status.value, new_departure, new_arrival, 
-                                           flight_series, flight_number))
-                print(f"Flight delayed by {delay_minutes} minutes")
+                # BUG: Not converting delay_minutes to integer
+                departure_time = result[0] + timedelta(minutes=delay_minutes)
+                arrival_time = result[1] + timedelta(minutes=delay_minutes)
+                
+                # Update flight status and times
+                self.cursor.execute("""
+                    UPDATE flight 
+                    SET status = %s, departuretime = %s, arrivaltime = %s
+                    WHERE flightnumber = %s
+                """, (new_status, departure_time, arrival_time, flight_number))
             else:
-                query = "UPDATE flight SET status = %s WHERE flightseries = %s AND flightnumber = %s"
-                self.db.execute_query(query, (status.value, flight_series, flight_number))
-                print(f"Flight status updated to {status.value}")
-                
-        except ValueError:
-            print(f"Invalid status. Valid statuses are: {', '.join([s.value for s in FlightStatus])}")
+                # Update only the status
+                self.cursor.execute("""
+                    UPDATE flight 
+                    SET status = %s
+                    WHERE flightnumber = %s
+                """, (new_status, flight_number))
+            
+            self.connection.commit()
+            return True
+        except Exception as e:
+            print(f"Error updating flight status: {str(e)}")
+            return False
 
     def get_flight_status(self, flight_series: str, flight_number: int) -> str:
         """Get the current status of a flight."""
