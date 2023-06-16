@@ -52,7 +52,8 @@ class FlightManager:
                 if not result:
                     raise ValueError(f"Flight {flight_number} not found")
                 
-                # BUG: Not converting delay_minutes to integer
+                # FIX: Convert delay_minutes to int
+                delay_minutes = int(delay_minutes)
                 departure_time = result[0] + timedelta(minutes=delay_minutes)
                 arrival_time = result[1] + timedelta(minutes=delay_minutes)
                 
