@@ -19,6 +19,7 @@ class FlightManager:
 
     def __init__(self, db: DatabaseConnection):
         self.db = db
+        self.last_searched_route = None  # Store the last searched route
 
     def add_flight(self, flight_series: str, flight_number: int, departure: str, 
                   arrival: str, departure_time: str, arrival_time: str, 
@@ -126,6 +127,8 @@ class FlightManager:
             print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats")
             for row in result:
                 print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}")
+            # Store the last searched route if no booking is made
+            self.last_searched_route = {'departure': departure, 'arrival': arrival}
         else:
             print("No flights found matching the criteria")
 
@@ -151,6 +154,8 @@ class FlightManager:
             print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats")
             for row in result:
                 print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}")
+            # Store the last searched route if no booking is made
+            self.last_searched_route = {'departure': departure, 'arrival': arrival}
         else:
             print("No flights found matching the criteria")
 
