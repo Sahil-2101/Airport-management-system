@@ -23,14 +23,16 @@ class FlightManager:
 
     def add_flight(self, flight_series: str, flight_number: int, departure: str, 
                   arrival: str, departure_time: str, arrival_time: str, 
-                  total_seats: int, available_seats: int, distance: float, duration: int) -> None:
-        """Add a new flight to the system, including distance and duration."""
+                  total_seats: int, available_seats: int, distance: float, duration: int, stops: int) -> None:
+        """Add a new flight to the system, including distance, duration, and stops."""
+        if stops not in [0, 1, 2]:
+            raise ValueError("Stops must be 0, 1, or 2.")
         query = """INSERT INTO flight (flightseries, flightnumber, departure, arrival, 
-                  departuretime, arrivaltime, totalseats, available, status, distance, duration) 
-                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                  departuretime, arrivaltime, totalseats, available, status, distance, duration, stops) 
+                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
         params = (flight_series, flight_number, departure, arrival, 
                  departure_time, arrival_time, total_seats, available_seats, 
-                 FlightStatus.SCHEDULED.value, distance, duration)
+                 FlightStatus.SCHEDULED.value, distance, duration, stops)
         self.db.execute_query(query, params)
         print("Flight added successfully")
 
@@ -87,7 +89,7 @@ class FlightManager:
         return None
 
     def view_flight_schedule(self, date: str = None) -> None:
-        """View flight schedule for a specific date or all flights, including distance and duration."""
+        """View flight schedule for a specific date or all flights, including distance, duration, and stops."""
         if date:
             query = """SELECT * FROM flight 
                       WHERE DATE(departuretime) = %s 
@@ -99,14 +101,14 @@ class FlightManager:
 
         if result:
             print("\nFlight Schedule:")
-            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)")
+            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)\tStops")
             for row in result:
-                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}")
+                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}\t{row[11]}")
         else:
             print("No flights found")
 
     def search_flights(self, departure: str = None, arrival: str = None, page: int = 1, page_size: int = 5) -> None:
-        """Search for flights based on departure and/or arrival locations with pagination, including distance and duration."""
+        """Search for flights based on departure and/or arrival locations with pagination, including distance, duration, and stops."""
         offset = (page - 1) * page_size
         if departure and arrival:
             query = "SELECT * FROM flight WHERE departure = %s AND arrival = %s ORDER BY departuretime LIMIT %s OFFSET %s"
@@ -124,15 +126,15 @@ class FlightManager:
         result = self.db.execute_query(query, params)
         if result:
             print(f"\nSearch Results (Page {page}):")
-            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)")
+            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)\tStops")
             for row in result:
-                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}")
+                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}\t{row[11]}")
             self.last_searched_route = {'departure': departure, 'arrival': arrival}
         else:
             print("No flights found matching the criteria")
 
     def search_flights_advanced(self, date: str = None, departure: str = None, arrival: str = None, page: int = 1, page_size: int = 5) -> None:
-        """Search for flights by date, departure, and/or arrival locations with pagination, including distance and duration."""
+        """Search for flights by date, departure, and/or arrival locations with pagination, including distance, duration, and stops."""
         offset = (page - 1) * page_size
         query = "SELECT * FROM flight WHERE 1=1"
         params = []
@@ -150,9 +152,9 @@ class FlightManager:
         result = self.db.execute_query(query, tuple(params))
         if result:
             print(f"\nSearch Results (Page {page}):")
-            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)")
+            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)\tStops")
             for row in result:
-                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}")
+                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}\t{row[11]}")
             self.last_searched_route = {'departure': departure, 'arrival': arrival}
         else:
             print("No flights found matching the criteria")
