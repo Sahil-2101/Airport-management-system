@@ -3,33 +3,25 @@ Flight management module for the Airport Management System.
 """
 
 from src.database.connection import DatabaseConnection
-from enum import Enum
+from src.managers.flight.status import FlightStatus
+from src.managers.flight.fare import FareCalculator
+from src.managers.flight.search import FlightSearch
+from src.managers.flight.schedule import FlightSchedule
 from datetime import datetime, timedelta
-
-class FlightStatus(Enum):
-    """Enum for flight statuses."""
-    SCHEDULED = "SCHEDULED"
-    DELAYED = "DELAYED"
-    CANCELLED = "CANCELLED"
-    DEPARTED = "DEPARTED"
-    ARRIVED = "ARRIVED"
 
 class FlightManager:
     """Handles all flight-related operations."""
 
     def __init__(self, db: DatabaseConnection):
         self.db = db
-        self.last_searched_route = None  # Store the last searched route
+        self.search = FlightSearch(db)
+        self.schedule = FlightSchedule(db)
 
     def add_flight(self, flight_series: str, flight_number: int, departure: str, 
                   arrival: str, departure_time: str, arrival_time: str, 
                   total_seats: int, available_seats: int, distance: float, duration: int, stops: int) -> None:
-        """Add a new flight to the system, including distance, duration, stops, and calculated fare."""
-        if stops not in [0, 1, 2]:
-            raise ValueError("Stops must be 0, 1, or 2.")
-        # Calculate fare based on distance, duration, and stops
-        base_fare = distance * 0.1 + duration * 0.05
-        fare = base_fare * (1 - 0.15 * stops)
+        """Add a new flight to the system."""
+        fare = FareCalculator.calculate_fare(distance, duration, stops)
         query = """INSERT INTO flight (flightseries, flightnumber, departure, arrival, 
                   departuretime, arrivaltime, totalseats, available, status, distance, duration, stops, fare) 
                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
@@ -42,13 +34,10 @@ class FlightManager:
     def update_flight_status(self, flight_number, new_status, delay_minutes=None):
         """Update the status of a flight"""
         try:
-            # Validate the new status
             if new_status not in [status.value for status in FlightStatus]:
                 raise ValueError(f"Invalid status. Must be one of: {[status.value for status in FlightStatus]}")
 
-            # If status is DELAYED, update departure and arrival times
             if new_status == FlightStatus.DELAYED.value and delay_minutes is not None:
-                # Get current flight times
                 self.cursor.execute("""
                     SELECT departuretime, arrivaltime 
                     FROM flight 
@@ -58,19 +47,16 @@ class FlightManager:
                 if not result:
                     raise ValueError(f"Flight {flight_number} not found")
                 
-                # FIX: Convert delay_minutes to int
                 delay_minutes = int(delay_minutes)
                 departure_time = result[0] + timedelta(minutes=delay_minutes)
                 arrival_time = result[1] + timedelta(minutes=delay_minutes)
                 
-                # Update flight status and times
                 self.cursor.execute("""
                     UPDATE flight 
                     SET status = %s, departuretime = %s, arrivaltime = %s
                     WHERE flightnumber = %s
                 """, (new_status, departure_time, arrival_time, flight_number))
             else:
-                # Update only the status
                 self.cursor.execute("""
                     UPDATE flight 
                     SET status = %s
@@ -91,79 +77,19 @@ class FlightManager:
             return result[0][0]
         return None
 
+    # Delegate to specialized classes
     def view_flight_schedule(self, date: str = None) -> None:
-        """View flight schedule for a specific date or all flights, including distance, duration, stops, and fare."""
-        if date:
-            query = """SELECT * FROM flight 
-                      WHERE DATE(departuretime) = %s 
-                      ORDER BY departuretime"""
-            result = self.db.execute_query(query, (date,))
-        else:
-            query = "SELECT * FROM flight ORDER BY departuretime"
-            result = self.db.execute_query(query)
-
-        if result:
-            print("\nFlight Schedule:")
-            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)\tStops\tFare($)")
-            for row in result:
-                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}\t{row[11]}\t{row[12]}")
-        else:
-            print("No flights found")
+        """View flight schedule for a specific date or all flights."""
+        self.schedule.view_flight_schedule(date)
 
     def search_flights(self, departure: str = None, arrival: str = None, page: int = 1, page_size: int = 5) -> None:
-        """Search for flights based on departure and/or arrival locations with pagination, including distance, duration, stops, and fare."""
-        offset = (page - 1) * page_size
-        if departure and arrival:
-            query = "SELECT * FROM flight WHERE departure = %s AND arrival = %s ORDER BY departuretime LIMIT %s OFFSET %s"
-            params = (departure, arrival, page_size, offset)
-        elif departure:
-            query = "SELECT * FROM flight WHERE departure = %s ORDER BY departuretime LIMIT %s OFFSET %s"
-            params = (departure, page_size, offset)
-        elif arrival:
-            query = "SELECT * FROM flight WHERE arrival = %s ORDER BY departuretime LIMIT %s OFFSET %s"
-            params = (arrival, page_size, offset)
-        else:
-            print("Please specify at least one search criteria")
-            return
-
-        result = self.db.execute_query(query, params)
-        if result:
-            print(f"\nSearch Results (Page {page}):")
-            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)\tStops\tFare($)")
-            for row in result:
-                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}\t{row[11]}\t{row[12]}")
-            self.last_searched_route = {'departure': departure, 'arrival': arrival}
-        else:
-            print("No flights found matching the criteria")
+        """Search for flights based on departure and/or arrival locations."""
+        self.search.search_flights(departure, arrival, page, page_size)
 
     def search_flights_advanced(self, date: str = None, departure: str = None, arrival: str = None, page: int = 1, page_size: int = 5) -> None:
-        """Search for flights by date, departure, and/or arrival locations with pagination, including distance, duration, stops, and fare."""
-        offset = (page - 1) * page_size
-        query = "SELECT * FROM flight WHERE 1=1"
-        params = []
-        if date:
-            query += " AND DATE(departuretime) = %s"
-            params.append(date)
-        if departure:
-            query += " AND departure = %s"
-            params.append(departure)
-        if arrival:
-            query += " AND arrival = %s"
-            params.append(arrival)
-        query += " ORDER BY departuretime LIMIT %s OFFSET %s"
-        params.extend([page_size, offset])
-        result = self.db.execute_query(query, tuple(params))
-        if result:
-            print(f"\nSearch Results (Page {page}):")
-            print("Flight\tFrom\tTo\tDeparture\tArrival\tStatus\tAvailable Seats\tDistance(km)\tDuration(min)\tStops\tFare($)")
-            for row in result:
-                print(f"{row[0]}{row[1]}\t{row[2]}\t{row[3]}\t{row[4]}\t{row[5]}\t{row[8]}\t{row[7]}\t{row[9]}\t{row[10]}\t{row[11]}\t{row[12]}")
-            self.last_searched_route = {'departure': departure, 'arrival': arrival}
-        else:
-            print("No flights found matching the criteria")
+        """Search for flights by date, departure, and/or arrival locations."""
+        self.search.search_flights_advanced(date, departure, arrival, page, page_size)
 
     def reschedule_flight(self, flight_series: str, flight_number: int, new_departure_time: str, new_arrival_time: str) -> None:
         """Reschedule a flight by updating its departure and arrival times."""
-        query = "UPDATE flight SET departuretime = %s, arrivaltime = %s WHERE flightseries = %s AND flightnumber = %s"
-        self.db.execute_query(query, (new_departure_time, new_arrival_time, flight_series, flight_number))
-        print(f"Flight {flight_series}{flight_number} rescheduled to depart at {new_departure_time} and arrive at {new_arrival_time}.") 
+        self.schedule.reschedule_flight(flight_series, flight_number, new_departure_time, new_arrival_time) 
