@@ -3,52 +3,31 @@ Admin management module for the Airport Management System.
 """
 
 from src.database.connection import DatabaseConnection
+from .admin import AdminEmployee
 
 class AdminManager:
     """Handles all administrative operations."""
 
     def __init__(self, db: DatabaseConnection):
         self.db = db
+        self.employee = AdminEmployee(db)
 
     def display_employee(self, emp_id: int) -> None:
         """Display details of a specific employee."""
-        query = "SELECT * FROM Employee WHERE employeeid = %s"
-        result = self.db.execute_query(query, (emp_id,))
-        if result:
-            for row in result:
-                print(row)
+        self.employee.display_employee(emp_id)
 
     def insert_employee(self, emp_id: int, name: str, sales: int, job_id: int) -> None:
         """Insert a new employee record."""
-        query = "INSERT INTO Employee VALUES (%s, %s, %s, %s)"
-        self.db.execute_query(query, (emp_id, name, sales, job_id))
+        self.employee.insert_employee(emp_id, name, sales, job_id)
 
     def update_employee(self, emp_id: int, field: str, new_value: str) -> None:
         """Update specific field of an employee record."""
-        query = f"UPDATE Employee SET {field} = %s WHERE employeeid = %s"
-        self.db.execute_query(query, (new_value, emp_id))
+        self.employee.update_employee(emp_id, field, new_value)
 
     def delete_employee(self, emp_id: int) -> None:
         """Delete an employee record after confirmation."""
-        # First display the record
-        query = "SELECT * FROM Employee WHERE employeeid = %s"
-        result = self.db.execute_query(query, (emp_id,))
-        if result:
-            print(f"Employee details to be deleted: {result[0]}")
-            if input("Confirm deletion? (yes/no): ").lower() == 'yes':
-                query = "DELETE FROM Employee WHERE employeeid = %s"
-                self.db.execute_query(query, (emp_id,))
-                print("Record deleted successfully")
+        self.employee.delete_employee(emp_id)
 
     def list_employees(self, page: int = 1, page_size: int = 5) -> None:
         """List all employees with pagination."""
-        offset = (page - 1) * page_size
-        query = "SELECT * FROM Employee ORDER BY employeeid LIMIT %s OFFSET %s"
-        result = self.db.execute_query(query, (page_size, offset))
-        if result:
-            print(f"\nEmployee List (Page {page}):")
-            print("ID\tName\tSales\tJob ID")
-            for row in result:
-                print(f"{row[0]}\t{row[1]}\t{row[2]}\t{row[3]}")
-        else:
-            print("No employees found on this page.")
+        self.employee.list_employees(page, page_size)
