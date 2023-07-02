@@ -7,6 +7,8 @@ from .profile import PassengerProfile
 from .history import PassengerHistory
 from .notifications import PassengerNotifier
 from .booking import PassengerBooking
+from .passenger_details import PassengerDetails
+from .passenger_cancellation import PassengerCancellation
 
 __all__ = [
     'PassengerAuth',
@@ -14,4 +16,6 @@ __all__ = [
     'PassengerHistory',
     'PassengerNotifier',
     'PassengerBooking',
+    'PassengerDetails',
+    'PassengerCancellation',
 ] 
