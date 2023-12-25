@@ -2,11 +2,14 @@
 Flight search module for the Airport Management System.
 """
 
+from src.database.connection import DatabaseConnection
+
 class FlightSearch:
     """Handles flight search operations."""
     
-    def __init__(self, db):
-        self.db = db
+    def __init__(self):
+        """Initialize the flight search manager."""
+        self.db = DatabaseConnection()
         self.last_searched_route = None
 
     def search_flights(self, departure: str = None, arrival: str = None, page: int = 1, page_size: int = 5) -> None:

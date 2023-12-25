@@ -3,12 +3,14 @@ Flight schedule management module for the Airport Management System.
 """
 
 from datetime import timedelta
+from src.database.connection import DatabaseConnection
 
 class FlightSchedule:
     """Handles flight schedule operations."""
     
-    def __init__(self, db):
-        self.db = db
+    def __init__(self):
+        """Initialize the flight schedule manager."""
+        self.db = DatabaseConnection()
 
     def view_flight_schedule(self, date: str = None) -> None:
         """View flight schedule for a specific date or all flights."""

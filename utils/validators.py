@@ -1,29 +1,31 @@
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar, Optional
 
-def get_valid_input(prompt: str, expected_type: type, validator: Callable[[Any], bool] = None) -> Any:
+T = TypeVar('T')
+
+def get_valid_input(prompt: str, expected_type: type, validator: Optional[Callable[[Any], bool]] = None) -> T:
     """
-    Get valid input from user with type checking and optional validation.
+    Get valid input from the user.
     
     Args:
         prompt: The input prompt to display
-        expected_type: The expected type of input (e.g., str, int, float)
-        validator: Optional function to validate the input value
+        expected_type: The expected type of the input
+        validator: Optional validation function that returns True if input is valid
         
     Returns:
-        The validated input value of the expected type
+        The validated input of the expected type
     """
     while True:
         try:
-            value = input(prompt)
-            converted_value = expected_type(value)
+            user_input = input(prompt)
+            converted_input = expected_type(user_input)
             
-            if validator and not validator(converted_value):
+            if validator and not validator(converted_input):
                 print(f"Invalid input. Please try again.")
                 continue
                 
-            return converted_value
+            return converted_input
             
         except ValueError:
-            print(f"Invalid input. Expected {expected_type.__name__}.")
+            print(f"Invalid input. Please enter a valid {expected_type.__name__}.")
         except Exception as e:
-            print(f"Error: {str(e)}") 
+            print(f"An error occurred: {str(e)}") 

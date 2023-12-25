@@ -1,10 +1,9 @@
 from typing import Callable, Dict
 from utils.validators import get_valid_input
 from utils.helpers import clear_screen, print_header
-from flight_management.flight_operations import (
-    add_flight, update_flight, delete_flight,
-    search_flights, view_all_flights
-)
+from src.managers.flight.schedule import FlightSchedule
+from src.managers.flight.search import FlightSearch
+from src.managers.flight.status import FlightStatusManager
 
 def display_flight_menu() -> None:
     """Display the flight management menu options."""
@@ -19,6 +18,10 @@ def display_flight_menu() -> None:
 
 def handle_flight_menu() -> None:
     """Handle flight management menu selection."""
+    schedule_manager = FlightSchedule()
+    search_manager = FlightSearch()
+    status_manager = FlightStatusManager()
+    
     while True:
         clear_screen()
         display_flight_menu()
@@ -32,11 +35,11 @@ def handle_flight_menu() -> None:
             break
             
         menu_handlers: Dict[str, Callable] = {
-            '1': add_flight,
-            '2': update_flight,
-            '3': delete_flight,
-            '4': search_flights,
-            '5': view_all_flights
+            '1': schedule_manager.add_flight,
+            '2': schedule_manager.update_flight,
+            '3': schedule_manager.delete_flight,
+            '4': search_manager.search_flights,
+            '5': schedule_manager.view_all_flights
         }
         
         handler = menu_handlers.get(choice)

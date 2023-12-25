@@ -1,11 +1,9 @@
 from typing import Callable, Dict
 from utils.validators import get_valid_input
 from utils.helpers import clear_screen, print_header
-from passenger_management.passenger_operations import (
-    register_passenger, update_passenger,
-    delete_passenger, search_passengers,
-    view_all_passengers
-)
+from src.managers.passenger.profile import PassengerProfile
+from src.managers.passenger.passenger_details import PassengerDetails
+from src.managers.passenger.booking import PassengerBooking
 
 def display_passenger_menu() -> None:
     """Display the passenger management menu options."""
@@ -20,6 +18,10 @@ def display_passenger_menu() -> None:
 
 def handle_passenger_menu() -> None:
     """Handle passenger management menu selection."""
+    profile_manager = PassengerProfile()
+    details_manager = PassengerDetails()
+    booking_manager = PassengerBooking()
+    
     while True:
         clear_screen()
         display_passenger_menu()
@@ -33,11 +35,11 @@ def handle_passenger_menu() -> None:
             break
             
         menu_handlers: Dict[str, Callable] = {
-            '1': register_passenger,
-            '2': update_passenger,
-            '3': delete_passenger,
-            '4': search_passengers,
-            '5': view_all_passengers
+            '1': profile_manager.register_passenger,
+            '2': profile_manager.update_passenger,
+            '3': profile_manager.delete_passenger,
+            '4': details_manager.search_passengers,
+            '5': details_manager.view_all_passengers
         }
         
         handler = menu_handlers.get(choice)
