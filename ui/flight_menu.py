@@ -39,7 +39,7 @@ def handle_flight_menu() -> None:
             '2': schedule_manager.update_flight,
             '3': schedule_manager.delete_flight,
             '4': search_manager.search_flights,
-            '5': schedule_manager.view_all_flights
+            '5': schedule_manager.view_flight_schedule
         }
         
         handler = menu_handlers.get(choice)
