@@ -18,29 +18,50 @@ class ReportOperations:
         print("-" * 50)
         
         try:
-            # Get flight statistics
-            query = """
-                SELECT 
-                    COUNT(*) as total_flights,
-                    COUNT(CASE WHEN status = 'Scheduled' THEN 1 END) as scheduled,
-                    COUNT(CASE WHEN status = 'Boarding' THEN 1 END) as boarding,
-                    COUNT(CASE WHEN status = 'Departed' THEN 1 END) as departed,
-                    COUNT(CASE WHEN status = 'Arrived' THEN 1 END) as arrived,
-                    COUNT(CASE WHEN status = 'Delayed' THEN 1 END) as delayed,
-                    COUNT(CASE WHEN status = 'Cancelled' THEN 1 END) as cancelled
-                FROM flights
-            """
-            stats = self.db.execute_query(query)[0]
+            # A simpler approach: fetch all statuses and count in Python
+            query = "SELECT status FROM flights"
+            results = self.db.execute_query(query)
             
-            print(f"\nReport generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print("\nFlight Statistics:")
-            print(f"Total Flights: {stats[0]}")
-            print(f"Scheduled: {stats[1]}")
-            print(f"Boarding: {stats[2]}")
-            print(f"Departed: {stats[3]}")
-            print(f"Arrived: {stats[4]}")
-            print(f"Delayed: {stats[5]}")
-            print(f"Cancelled: {stats[6]}")
+            if results:
+                # Initialize a dictionary to hold status counts
+                status_counts = {
+                    'total_flights': 0,
+                    'scheduled': 0,
+                    'on_time': 0,
+                    'departed': 0,
+                    'arrived': 0,
+                    'delayed': 0,
+                    'cancelled': 0
+                }
+
+                # Count statuses in Python
+                for row in results:
+                    status = row[0]
+                    status_counts['total_flights'] += 1
+                    if status == 'Scheduled':
+                        status_counts['scheduled'] += 1
+                    elif status == 'ON TIME':
+                        status_counts['on_time'] += 1
+                    elif status == 'Departed':
+                        status_counts['departed'] += 1
+                    elif status == 'Arrived':
+                        status_counts['arrived'] += 1
+                    elif status == 'Delayed':
+                        status_counts['delayed'] += 1
+                    elif status == 'Cancelled':
+                        status_counts['cancelled'] += 1
+
+                print(f"\nReport generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                print("\nFlight Statistics:")
+                print(f"Total Flights: {status_counts['total_flights']}")
+                print(f"Scheduled: {status_counts['scheduled']}")
+                print(f"On Time: {status_counts['on_time']}")
+                print(f"Departed: {status_counts['departed']}")
+                print(f"Arrived: {status_counts['arrived']}")
+                print(f"Delayed: {status_counts['delayed']}")
+                print(f"Cancelled: {status_counts['cancelled']}")
+            else:
+                print("Could not retrieve flight statistics.")
             
         except Exception as e:
             print(f"\nError generating flight report: {str(e)}")
@@ -51,21 +72,25 @@ class ReportOperations:
         print("-" * 50)
         
         try:
-            # Get passenger statistics
+            # Get passenger statistics from the bookings table
             query = """
                 SELECT 
-                    COUNT(*) as total_passengers,
-                    COUNT(DISTINCT flight_id) as total_flights,
-                    COUNT(*) / COUNT(DISTINCT flight_id) as avg_passengers_per_flight
-                FROM passengers
+                    COUNT(DISTINCT username) as total_passengers,
+                    COUNT(DISTINCT CONCAT(flight_series, flight_number)) as total_flights_with_bookings,
+                    COUNT(*) as total_bookings
+                FROM bookings
             """
-            stats = self.db.execute_query(query)[0]
-            
-            print(f"\nReport generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print("\nPassenger Statistics:")
-            print(f"Total Passengers: {stats[0]}")
-            print(f"Total Flights: {stats[1]}")
-            print(f"Average Passengers per Flight: {stats[2]:.2f}")
+            stats_result = self.db.execute_query(query)
+
+            if stats_result:
+                stats = stats_result[0]
+                print(f"\nReport generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                print("\nPassenger Statistics:")
+                print(f"Total Unique Passengers with Bookings: {stats[0]}")
+                print(f"Total Flights with Bookings: {stats[1]}")
+                print(f"Total Bookings: {stats[2]}")
+            else:
+                print("Could not retrieve passenger statistics.")
             
         except Exception as e:
             print(f"\nError generating passenger report: {str(e)}")

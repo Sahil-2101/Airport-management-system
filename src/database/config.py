@@ -6,6 +6,6 @@ Database configuration settings for the Airport Management System.
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "passwd": "1234",
+    "passwd": "Sahil@2003",
     "database": "flightproject"
 } 

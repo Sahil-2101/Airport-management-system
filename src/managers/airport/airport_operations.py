@@ -119,13 +119,13 @@ class AirportOperations:
         
         try:
             if choice == '1':
-                query = "SELECT * FROM airports WHERE code ILIKE %s"
+                query = "SELECT * FROM airports WHERE code LIKE %s"
                 params = (f'%{search_term}%',)
             elif choice == '2':
-                query = "SELECT * FROM airports WHERE city ILIKE %s"
+                query = "SELECT * FROM airports WHERE city LIKE %s"
                 params = (f'%{search_term}%',)
             elif choice == '3':
-                query = "SELECT * FROM airports WHERE country ILIKE %s"
+                query = "SELECT * FROM airports WHERE country LIKE %s"
                 params = (f'%{search_term}%',)
             else:
                 print("\nInvalid choice!")

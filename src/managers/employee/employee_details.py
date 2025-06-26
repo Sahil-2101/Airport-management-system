@@ -31,13 +31,13 @@ class EmployeeDetails:
         
         try:
             if choice == '1':
-                query = "SELECT * FROM employees WHERE name ILIKE %s"
+                query = "SELECT * FROM employees WHERE name LIKE %s"
                 params = (f'%{search_term}%',)
             elif choice == '2':
-                query = "SELECT * FROM employees WHERE department ILIKE %s"
+                query = "SELECT * FROM employees WHERE department LIKE %s"
                 params = (f'%{search_term}%',)
             elif choice == '3':
-                query = "SELECT * FROM employees WHERE position ILIKE %s"
+                query = "SELECT * FROM employees WHERE position LIKE %s"
                 params = (f'%{search_term}%',)
             else:
                 print("\nInvalid choice!")
@@ -71,5 +71,17 @@ class EmployeeDetails:
         print("\nEmployee ID | Name | Position | Department | Contact | Email")
         print("-" * 80)
         
+        def format_cell(data, width, align='<'):
+            """Safely format cell data, handling None values."""
+            if data is None:
+                return f"{'N/A':{align}{width}}"
+            return f"{str(data):{align}{width}}"
+
         for emp in results:
-            print(f"{emp[0]:<11} | {emp[1]:<20} | {emp[2]:<15} | {emp[3]:<15} | {emp[4]:<10} | {emp[5]}") 
+            emp_id = format_cell(emp[0], 11)
+            name = format_cell(emp[1], 20)
+            position = format_cell(emp[2], 15)
+            department = format_cell(emp[3], 15)
+            contact = format_cell(emp[4], 10)
+            email = format_cell(emp[5], 0)  # No padding for the last item
+            print(f"{emp_id} | {name} | {position} | {department} | {contact} | {email}") 
