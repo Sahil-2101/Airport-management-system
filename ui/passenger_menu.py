@@ -60,20 +60,20 @@ def handle_passenger_menu() -> None:
             new_value = input(f"Enter new value for {field}: ")
             profile_manager.update_profile(username, field, new_value)
         elif choice == '3':
-            # Delete Passenger - Note: A safe delete would typically deactivate, not remove.
-            print("Delete passenger logic not fully implemented for safety.")
-            # username = input("Enter username to delete: ")
-            # profile_manager.delete_account(username) # Assuming this method exists
+            # Delete Passenger
+            username = input("Enter username to delete: ")
+            confirm = input(f"Are you sure you want to delete the account for '{username}'? (y/n): ")
+            if confirm.lower() == 'y':
+                profile_manager.delete_account(username)
+            else:
+                print("Deletion cancelled.")
         elif choice == '4':
             # Search Passengers
-            print("Search logic not fully implemented yet.")
-            # For example:
-            # username = input("Enter username to search for: ")
-            # profile_manager.view_profile(username)
+            username = input("Enter username to search for: ")
+            profile_manager.view_profile(username)
         elif choice == '5':
             # View All Passengers
-            print("Viewing all passengers is not implemented in the manager yet.")
-            # This would require a `view_all_profiles` method in PassengerProfile
+            profile_manager.view_all_profiles()
         elif choice == '6':
             break
         else:

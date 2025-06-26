@@ -38,17 +38,17 @@ class ReportOperations:
                 for row in results:
                     status = row[0]
                     status_counts['total_flights'] += 1
-                    if status == 'Scheduled':
+                    if status == 'SCHEDULED':
                         status_counts['scheduled'] += 1
                     elif status == 'ON TIME':
                         status_counts['on_time'] += 1
-                    elif status == 'Departed':
+                    elif status == 'DEPARTED':
                         status_counts['departed'] += 1
-                    elif status == 'Arrived':
+                    elif status == 'ARRIVED':
                         status_counts['arrived'] += 1
-                    elif status == 'Delayed':
+                    elif status == 'DELAYED':
                         status_counts['delayed'] += 1
-                    elif status == 'Cancelled':
+                    elif status == 'CANCELLED':
                         status_counts['cancelled'] += 1
 
                 print(f"\nReport generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
